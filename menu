@@ -1,0 +1,140 @@
+#!/bin/bash
+
+PORT_FILE="/opt/dtunnelmod/port"
+
+# Função para verificar se uma porta está em uso
+is_port_in_use() {
+    local port=$1
+    if lsof -i :$port > /dev/null 2>&1; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Função para inciar o painel
+start_dtunnel_painel() {
+    local port=$1
+
+    if is_port_in_use $port; then
+        echo "A porta $port já está em uso."
+        return
+    fi
+    
+
+    # Definindo variaveis para execução do painel
+    echo "PORT=$port" > /opt/dtunnelmod//opt/dtunnelmod/.env
+    echo "NODE_ENV=\"production\"" >> /opt/dtunnelmod/.env
+    echo "DATABASE_URL=\"file:/opt/dtunnelmod/prisma/database.db\"" >> /opt/dtunnelmod/.env
+    token1=$(node -e "console.log(require('crypto').randomBytes(100).toString('base64'));")
+    token2=$(node -e "console.log(require('crypto').randomBytes(100).toString('base64'));")
+    token3=$(node -e "console.log(require('crypto').randomBytes(100).toString('base64'));")
+    echo "CSRF_SECRET=\"$token1\"" >> /opt/dtunnelmod/.env
+    echo "JWT_SECRET_KEY=\"$token2\"" >> /opt/dtunnelmod/.env
+    echo "JWT_SECRET_REFRESH=\"$token3\"" >> /opt/dtunnelmod/.env
+    echo "ENCRYPT_FILES=\"7223fd56-e21d-4191-8867-f3c67601122a\"" >> /opt/dtunnelmod/.env
+
+
+    # Criando serviço do painel
+    local command="/root/.nvm/versions/node/v18.20.4/bin/npm  --prefix /opt/dtunnelmod/ run start"
+    local service_file_path="/etc/systemd/system/dtunnelpainel.service"
+    local service_file_content="[Unit]
+Description=DtunnelPainel
+After=network.target
+
+[Service]
+LimitNOFILE=infinity
+LimitNPROC=infinity
+LimitMEMLOCK=infinity
+LimitSTACK=infinity
+LimitCORE=infinity
+LimitAS=infinity
+LimitRSS=infinity
+LimitCPU=infinity
+LimitFSIZE=infinity
+Type=simple
+ExecStart=${command}
+Restart=always
+
+[Install]
+WantedBy=multi-user.target"
+
+    echo "$service_file_content" | sudo tee "$service_file_path" > /dev/null
+    sudo systemctl daemon-reload
+    sudo systemctl enable "dtunnelpainel.service"
+    sudo systemctl start "dtunnelpainel.service"
+
+    # Salvar a porta no arquivo
+    echo $port >> "$PORT_FILE"
+    echo "Iniciado com sucesso"
+}
+
+# Função para parar o painel
+stop_dtunnel_painel() {
+    sudo systemctl disable "dtunnelpainel.service"
+    sudo systemctl stop "dtunnelpainel.service"
+    sudo rm -f "/etc/systemd/system/dtunnelpainel.service"
+    sudo systemctl daemon-reload
+
+    sudo rm -f "$PORT_FILE"
+    echo "Parado com sucesso"
+}
+
+# Função para exibir o menu formatado
+show_menu() {
+    clear
+    echo "------------------------------------------------"
+    printf "|                  %-28s|\n" "Dtunnel Painel"
+    echo "------------------------------------------------"
+
+    STATUS = 0;
+    # Verifica se há portas ativas
+    if [ ! -s "$PORT_FILE" ]; then
+        printf "| Porta: %-34s|\n" "nenhuma"
+    else
+        PORT = $(cat $PORT_FILE);
+        STATUS = 1;
+        printf "| Portas(s):%-35s|\n" $PORT
+    fi
+
+    echo "------------------------------------------------"
+    if status == 0; then 
+        printf "| %-45s|\n" "1 - Ativar Painel"
+    else
+        printf "| %-45s|\n" "1 - Parar Painel"
+    fi
+    printf "| %-45s|\n" "0 - Voltar ao menu"
+    echo "------------------------------------------------"
+    echo
+    read -p " --> Selecione uma opção: " option
+
+    case $option in
+        1)
+            if status == 0; then 
+                read -p "Digite a porta: " port
+                while ! [[ $port =~ ^[0-9]+$ ]]; do
+                    echo "Digite uma porta válida."
+                    read -p "Digite a porta: " port
+                done
+                start_dtunnel_painel $port
+                read -p "> Painel iniciado com sucesso. Pressione qualquer tecla para voltar ao menu." dummy
+            else
+                stop_dtunnel_painel $port
+                read -p "> Painel desativado com sucesso. Pressione qualquer tecla para voltar ao menu." dummy
+            fi
+            ;;
+        0)
+            exit 0
+            ;;
+        *)
+            echo "Opção inválida. Pressione qualquer tecla para voltar ao menu."
+            read -n 1 dummy
+            ;;
+    esac
+}
+
+
+# Loop do menu
+while true; do
+    show_menu
+done
