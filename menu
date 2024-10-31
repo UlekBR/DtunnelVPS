@@ -24,6 +24,7 @@ start_dtunnel_painel() {
     cd /opt/dtunnelmod/
 
     # Definindo variaveis para execução do painel
+    rm -rf /opt/dtunnelmod/.env
     echo "PORT=$port" > /opt/dtunnelmod/.env
     echo "NODE_ENV=\"production\"" >> /opt/dtunnelmod/.env
     echo "DATABASE_URL=\"file:/opt/dtunnelmod/prisma/database.db\"" >> /opt/dtunnelmod/.env
@@ -36,8 +37,8 @@ start_dtunnel_painel() {
     echo "ENCRYPT_FILES=\"7223fd56-e21d-4191-8867-f3c67601122a\"" >> /opt/dtunnelmod/.env
 
     npm run build
-    npx prisma generate
-    npx prisma migrate deploy
+    npx prisma migrate dev
+
 
     # Criando serviço do painel
     local command="/root/.nvm/versions/node/v18.20.4/bin/npm --prefix /opt/dtunnelmod/ run start"
