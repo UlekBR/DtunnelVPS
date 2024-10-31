@@ -24,13 +24,13 @@ else
     clear
     show_progress "Atualizando repositórios..."
     export DEBIAN_FRONTEND=noninteractive
-    apt update -y || error_exit "Falha ao atualizar os repositórios"
+    apt update -y >/dev/null 2>&1 || error_exit "Falha ao atualizar os repositórios"
     increment_step
 
     # ---->>>> Verificação do sistema
     show_progress "Verificando o sistema..."
     if ! command -v lsb_release &> /dev/null; then
-        apt install lsb-release -y || error_exit "Falha ao instalar lsb-release"
+        apt install lsb-release -y >/dev/null 2>&1 || error_exit "Falha ao instalar lsb-release"
     fi
     increment_step
 
@@ -67,34 +67,34 @@ else
 
     # ---->>>> Instalação de pacotes requisitos e atualização do sistema
     show_progress "Atualizando o sistema..."
-    apt upgrade -y || error_exit "Falha ao atualizar o sistema"
-    apt-get install wget git -y || error_exit "Falha ao instalar pacotes"
+    apt upgrade -y >/dev/null 2>&1 || error_exit "Falha ao atualizar o sistema"
+    apt-get install wget git -y >/dev/null 2>&1 || error_exit "Falha ao instalar pacotes"
     increment_step
 
     # ---->>>> Criando o diretório do script
     show_progress "Criando diretório /opt/dtunnelmod..."
-    mkdir -p /opt/dtunnelmod || error_exit "Falha ao criar o diretório"
+    mkdir -p /opt/dtunnelmod >/dev/null 2>&1 || error_exit "Falha ao criar o diretório"
     increment_step
 
     # ---->>>> Instalar Node.js
     show_progress "Instalando Node.js 18..."
     if ! command -v node &> /dev/null; then
-        bash <(wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh) || error_exit "Falha ao instalar NVM"
+        bash <(wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh) >/dev/null 2>&1 || error_exit "Falha ao instalar NVM"
         source "/root/.bashrc"
-        nvm install 18 || error_exit "Falha ao instalar Node.js"
+        nvm install 18 >/dev/null 2>&1 || error_exit "Falha ao instalar Node.js"
     fi
     increment_step
 
     # ---->>>> Instalar o DtunnelMOD Painel
     show_progress "Instalando DtunnelMOD Painel, isso pode levar algum tempo dependendo da máquina..."
     if [ -d "/root/DtunnelVPS" ]; then
-        rm -rf /root/DtunnelVPS
+        rm -rf /root/DtunnelVPS >/dev/null 2>&1
     fi
-    git clone --branch "main" https://github.com/UlekBR/DtunnelVPS.git /root/DtunnelVPS || error_exit "Falha ao clonar o painel dtunnel"
+    git clone --branch "main" https://github.com/UlekBR/DtunnelVPS.git /root/DtunnelVPS >/dev/null 2>&1 || error_exit "Falha ao clonar o painel dtunnel"
     mv /root/DtunnelVPS/menu /opt/dtunnelmod/menu || error_exit "Falha ao mover o menu"
     cd /root/DtunnelVPS/DTunnel/ || error_exit "Falha ao entrar no diretório DTunnel"
-    npm install -g typescript || error_exit "Falha ao instalar TypeScript"
-    npm install --force || error_exit "Falha ao instalar pacotes do DtunnelMOD"
+    npm install -g typescript >/dev/null 2>&1 || error_exit "Falha ao instalar TypeScript"
+    npm install --force >/dev/null 2>&1 || error_exit "Falha ao instalar pacotes do DtunnelMOD"
     
     mv /root/DtunnelVPS/DTunnel/* /opt/dtunnelmod/ || error_exit "Falha ao mover arquivos do DtunnelVPS"
     increment_step
