@@ -90,9 +90,6 @@ else
 
     # ---->>>> Instalar o DtunnelMOD Painel
     show_progress "Instalando DtunnelMOD Painel, isso pode levar algum tempo dependendo da máquina..."
-    if [ -d "/root/DtunnelVPS" ]; then
-        rm -rf /root/DtunnelVPS >/dev/null 2>&1
-    fi
     git clone --branch "main" https://github.com/UlekBR/DtunnelVPS.git /root/DtunnelVPS >/dev/null 2>&1 || error_exit "Falha ao clonar o painel dtunnel"
     mv /root/DtunnelVPS/menu /opt/dtunnelmod/menu || error_exit "Falha ao mover o menu"
     cd /root/DtunnelVPS/DTunnel/ || error_exit "Falha ao entrar no diretório DTunnel"
