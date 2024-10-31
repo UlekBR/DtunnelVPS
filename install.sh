@@ -78,11 +78,14 @@ else
 
     # ---->>>> Instalar Node.js
     show_progress "Instalando Node.js 18..."
-    if ! command -v node &> /dev/null; then
+    if [ ! -d "/root/.nvm" ]; then
         bash <(wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh) >/dev/null 2>&1 || error_exit "Falha ao instalar NVM"
-        source "/root/.bashrc"
+        source /root/.bashrc
         nvm install 18 >/dev/null 2>&1 || error_exit "Falha ao instalar Node.js"
+    else 
+        source /root/.bashrc
     fi
+
     increment_step
 
     # ---->>>> Instalar o DtunnelMOD Painel
