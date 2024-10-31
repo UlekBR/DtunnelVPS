@@ -21,9 +21,10 @@ start_dtunnel_painel() {
         return
     fi
     
+    cd /opt/dtunnelmod/
 
     # Definindo variaveis para execução do painel
-    echo "PORT=$port" > /opt/dtunnelmod//opt/dtunnelmod/.env
+    echo "PORT=$port" > /opt/dtunnelmod/.env
     echo "NODE_ENV=\"production\"" >> /opt/dtunnelmod/.env
     echo "DATABASE_URL=\"file:/opt/dtunnelmod/prisma/database.db\"" >> /opt/dtunnelmod/.env
     token1=$(node -e "console.log(require('crypto').randomBytes(100).toString('base64'));")
@@ -34,9 +35,12 @@ start_dtunnel_painel() {
     echo "JWT_SECRET_REFRESH=\"$token3\"" >> /opt/dtunnelmod/.env
     echo "ENCRYPT_FILES=\"7223fd56-e21d-4191-8867-f3c67601122a\"" >> /opt/dtunnelmod/.env
 
+    npm run build
+    npx prisma generate
+    npx prisma migrate deploy
 
     # Criando serviço do painel
-    local command="/root/.nvm/versions/node/v18.20.4/bin/npm  --prefix /opt/dtunnelmod/ run start"
+    local command="/root/.nvm/versions/node/v18.20.4/bin/npm --prefix /opt/dtunnelmod/ run start"
     local service_file_path="/etc/systemd/system/dtunnelpainel.service"
     local service_file_content="[Unit]
 Description=DtunnelPainel
@@ -52,9 +56,15 @@ LimitAS=infinity
 LimitRSS=infinity
 LimitCPU=infinity
 LimitFSIZE=infinity
+
+Environment=NVM_DIR=/root/.nvm
+Environment=PATH=/root/.nvm/versions/node/v18.20.4/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 Type=simple
 ExecStart=${command}
 Restart=always
+
+[Service]
+WorkingDirectory=/opt/dtunnelmod/
 
 [Install]
 WantedBy=multi-user.target"
@@ -87,18 +97,18 @@ show_menu() {
     printf "|                  %-28s|\n" "Dtunnel Painel"
     echo "------------------------------------------------"
 
-    STATUS = 0;
+    STATUS=0
     # Verifica se há portas ativas
     if [ ! -s "$PORT_FILE" ]; then
         printf "| Porta: %-34s|\n" "nenhuma"
     else
-        PORT = $(cat $PORT_FILE);
-        STATUS = 1;
-        printf "| Portas(s):%-35s|\n" $PORT
+        PORT=$(cat $PORT_FILE)
+        STATUS=1
+        printf "| Portas(s):%-35s|\n" "$PORT"
     fi
 
     echo "------------------------------------------------"
-    if status == 0; then 
+    if [ "$STATUS" -eq 0 ]; then 
         printf "| %-45s|\n" "1 - Ativar Painel"
     else
         printf "| %-45s|\n" "1 - Parar Painel"
@@ -110,7 +120,7 @@ show_menu() {
 
     case $option in
         1)
-            if status == 0; then 
+            if [ "$STATUS" -eq 0 ]; then 
                 read -p "Digite a porta: " port
                 while ! [[ $port =~ ^[0-9]+$ ]]; do
                     echo "Digite uma porta válida."
@@ -119,7 +129,7 @@ show_menu() {
                 start_dtunnel_painel $port
                 read -p "> Painel iniciado com sucesso. Pressione qualquer tecla para voltar ao menu." dummy
             else
-                stop_dtunnel_painel $port
+                stop_dtunnel_painel
                 read -p "> Painel desativado com sucesso. Pressione qualquer tecla para voltar ao menu." dummy
             fi
             ;;
@@ -132,7 +142,6 @@ show_menu() {
             ;;
     esac
 }
-
 
 # Loop do menu
 while true; do
