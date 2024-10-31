@@ -23,6 +23,9 @@ start_dtunnel_painel() {
     
     cd /opt/dtunnelmod/
 
+    # carregando nvm no bash
+    [ -s "/root/.nvm/nvm.sh" ] && \. "/root/.nvm/nvm.sh" 
+
     # Definindo variaveis para execução do painel
     rm -rf /opt/dtunnelmod/.env
     echo "PORT=$port" > /opt/dtunnelmod/.env
