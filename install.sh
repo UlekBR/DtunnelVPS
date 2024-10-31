@@ -82,8 +82,6 @@ else
         curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash > /dev/null 2>&1 || error_exit "Falha ao instalar NodeJS"
         source "/root/.bashrc"
         nvm install 18
-        npm install -g typescript
-        npm install
     fi
     increment_step
 
@@ -96,6 +94,8 @@ else
     git clone --branch "main" https://github.com/UlekBR/DtunnelVPS.git /root/DtunnelVPS > /dev/null 2>&1 || error_exit "Falha ao clonar o painel dtunnel"
     mv /root/DtunnelVPS/menu.sh /opt/dtunnelmod/menu
     cd /root/DtunnelVPS/Dtunnel
+    npm install -g typescript
+    npm install --force
     npx prisma generate
     npx prisma migrate deploy
     mv . /opt/dtunnelmod
