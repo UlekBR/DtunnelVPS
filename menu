@@ -94,17 +94,17 @@ stop_dtunnel_painel() {
 show_menu() {
     clear
     echo "------------------------------------------------"
-    printf "|                  %-28s|\n" "Dtunnel Painel"
+    printf "|                 %-29s|\n" "Dtunnel Painel"
     echo "------------------------------------------------"
 
     STATUS=0
     # Verifica se há portas ativas
     if [ ! -s "$PORT_FILE" ]; then
-        printf "| Porta: %-34s|\n" "nenhuma"
+        printf "| acesso: %-37s|\n" "inativo"
     else
         PORT=$(cat $PORT_FILE)
         STATUS=1
-        printf "| Portas(s):%-35s|\n" "$PORT"
+        printf "| acesso: %-37s|\n" "$(wget -qO- ipinfo.io/ip):$PORT"
     fi
 
     echo "------------------------------------------------"
