@@ -11,7 +11,7 @@ show_progress() {
 
 error_exit() {
     echo -e "\nErro: $1"
-    exit 1
+    exit 0
 }
 
 increment_step() {
@@ -78,13 +78,9 @@ else
 
     # ---->>>> Instalar Node.js
     show_progress "Instalando Node.js 18..."
-    if [ ! -d "/root/.nvm" ]; then
-        bash <(wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh) >/dev/null 2>&1 || error_exit "Falha ao instalar NVM"
-        source /root/.bashrc
-        nvm install 18 >/dev/null 2>&1 || error_exit "Falha ao instalar Node.js"
-    else 
-        source /root/.bashrc
-    fi
+    bash <(wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh) >/dev/null 2>&1 || error_exit "Falha ao instalar NVM"
+    source /root/.bashrc
+    nvm install 18 >/dev/null 2>&1 || error_exit "Falha ao instalar Node.js"
 
     increment_step
 

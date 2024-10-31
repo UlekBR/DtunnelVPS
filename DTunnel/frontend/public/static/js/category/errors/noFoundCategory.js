@@ -6,7 +6,7 @@ class NoFoundCategory {
     render() {
         this.root.innerHTML = `
             <div class="d-flex justify-content-center p-5">
-                <h4 class="text-muted">Nenhuma categoria encontrada</h4>
+                <h4 class="text-muted">INFELIZMENTE NÃO ENCONTRAMOS NENHUMA CATEGORIA</h4>
             </div>
         `
     }
