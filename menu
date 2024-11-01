@@ -108,7 +108,7 @@ show_menu() {
     else
         PORT=$(cat $PORT_FILE)
         STATUS=1
-        printf "| acesso: %-37s|\n" "$(wget -qO- ipinfo.io/ip):$PORT"
+        printf "| acesso: %-37s|\n" "http://$(wget -qO- ipinfo.io/ip):$PORT"
     fi
 
     echo "------------------------------------------------"
